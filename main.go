@@ -42,8 +42,8 @@ func render_mandelbrot(x_offset, y_offset, zoom float64, width, height int, wg *
 	height_correction := height / 2
 	var canvas_mutex sync.Mutex
 	for i := 0; i < runtime.NumCPU(); i++ {
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			for x := range width_chan {
 				for y := 0; y < height; y++ {
 					cr := pixel_to_mandelbrot(float64(x), x_offset, zoom, width_correction)
@@ -81,9 +81,9 @@ func main() {
 		Y_offset string
 	}
 	arg.MustParse(&args)
-	zoom, err := strconv.ParseFloat(args.Zoom, 8)
-	x_offset, err := strconv.ParseFloat(args.X_offset, 8)
-	y_offset, err := strconv.ParseFloat(args.Y_offset, 8)
+	zoom, _ := strconv.ParseFloat(args.Zoom, 64)
+	x_offset, _ := strconv.ParseFloat(args.X_offset, 64)
+	y_offset, _ := strconv.ParseFloat(args.Y_offset, 64)
 
 	var wg sync.WaitGroup
 	canvas := render_mandelbrot(x_offset, y_offset, zoom, width, height, &wg)
@@ -94,7 +94,7 @@ func main() {
 	}
 	// ensure image has finished rendering before encoding
 	wg.Wait()
-	if err = png.Encode(file, canvas); err != nil {
+	if err := png.Encode(file, canvas); err != nil {
 		panic(err)
 	}
 }

@@ -1,15 +1,13 @@
 package main
 
 import (
+	"flag"
 	"image"
 	"image/color"
 	"image/png"
 	"os"
 	"runtime"
-	"strconv"
 	"sync"
-
-	"github.com/alexflint/go-arg"
 )
 
 const (
@@ -75,18 +73,13 @@ func render_mandelbrot(x_offset, y_offset, zoom float64, width, height int, wg *
 }
 
 func main() {
-	var args struct {
-		Zoom     string `default:"0.002"`
-		X_offset string
-		Y_offset string
-	}
-	arg.MustParse(&args)
-	zoom, _ := strconv.ParseFloat(args.Zoom, 64)
-	x_offset, _ := strconv.ParseFloat(args.X_offset, 64)
-	y_offset, _ := strconv.ParseFloat(args.Y_offset, 64)
+	zoom := flag.Float64("z", 0.002, "zoom level - default = 0.002")
+	x_offset := flag.Float64("x", 0, "x offset from the middle")
+	y_offset := flag.Float64("y", 0, "y offset from the middle")
+	flag.Parse()
 
 	var wg sync.WaitGroup
-	canvas := render_mandelbrot(x_offset, y_offset, zoom, width, height, &wg)
+	canvas := render_mandelbrot(*x_offset, *y_offset, *zoom, width, height, &wg)
 
 	file, err := os.Create("result.png")
 	if err != nil {
